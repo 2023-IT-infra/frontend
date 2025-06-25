@@ -11,6 +11,7 @@ type DeviceContextType = {
   updateDevice: (id: string, deviceData: Partial<Device>) => Promise<void>
   deleteDevice: (id: string) => Promise<void>
   getDeviceById: (id: string) => Promise<Device | undefined>
+  searchDevices: (query: string) => Promise<void>
   refreshDevices: () => Promise<void>
 }
 
@@ -71,9 +72,9 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
 
     try {
       const updatedDevice = await deviceService.update(id, deviceData)
-      setDevices((prev) => prev.map((device) => (device.id === id ? updatedDevice : device)))
-      // 상태 업데이트 후 로그로 확인
-      console.log("Updated devices:", devices)
+      setDevices((prev) =>
+        prev.map((device) => (device.id === id ? updatedDevice : device))
+      )
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)
@@ -127,6 +128,28 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const searchDevices = async (query: string) => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const data =
+        query.trim() === ""
+          ? await deviceService.getAll()
+          : await deviceService.search(query)
+      setDevices(mapDevicesToApi(data))
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError("기기 검색 중 오류가 발생했습니다.")
+      }
+      console.error("기기 검색 오류:", err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const refreshDevices = async () => {
     await fetchDevices()
   }
@@ -141,6 +164,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
         updateDevice,
         deleteDevice,
         getDeviceById,
+        searchDevices,
         refreshDevices,
       }}
     >

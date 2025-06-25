@@ -2,88 +2,29 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
-type User = {
-  id: string
-  name: string
-  email: string
-  role: string
-  status: "active" | "inactive"
-  lastLogin: string
-}
-
-// Mock user data - in a real app, this would come from an API
-const mockUsers: Record<string, User> = {
-  "1": {
-    id: "1",
-    name: "김민준",
-    email: "minjun.kim@example.com",
-    role: "admin",
-    status: "active",
-    lastLogin: "2023-05-15T09:45:30",
-  },
-  "2": {
-    id: "2",
-    name: "이서연",
-    email: "seoyeon.lee@example.com",
-    role: "user",
-    status: "active",
-    lastLogin: "2023-05-14T14:22:10",
-  },
-  "3": {
-    id: "3",
-    name: "박지훈",
-    email: "jihoon.park@example.com",
-    role: "editor",
-    status: "inactive",
-    lastLogin: "2023-04-28T11:30:45",
-  },
-}
-
-export default function EditUserPage({ params }: { params: { id: string } }) {
+export default function NewUserPage() {
   const router = useRouter()
-  const userId = params.id
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     role: "",
-    isActive: false,
+    password: "",
+    confirmPassword: "",
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    // Simulate API fetch
-    setTimeout(() => {
-      const user = mockUsers[userId]
-      if (user) {
-        setFormData({
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          isActive: user.status === "active",
-        })
-      } else {
-        // Handle user not found
-        router.push("/")
-      }
-      setIsLoading(false)
-    }, 500)
-  }, [userId, router])
-
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
 
     // Clear error when field is edited
@@ -113,6 +54,16 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
       newErrors.role = "역할을 선택해주세요"
     }
 
+    if (!formData.password) {
+      newErrors.password = "비밀번호를 입력해주세요"
+    } else if (formData.password.length < 8) {
+      newErrors.password = "비밀번호는 최소 8자 이상이어야 합니다"
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "비밀번호가 일치하지 않습니다"
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -122,19 +73,10 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
 
     if (validateForm()) {
       // In a real app, you would submit the data to your backend here
-      console.log("Form submitted:", formData)
 
       // Redirect to the users list page
       router.push("/")
     }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-10 flex justify-center">
-        <p>로딩 중...</p>
-      </div>
-    )
   }
 
   return (
@@ -148,8 +90,8 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
 
       <Card className="mx-auto max-w-2xl">
         <CardHeader>
-          <CardTitle>사용자 편집</CardTitle>
-          <CardDescription>사용자 정보를 수정합니다.</CardDescription>
+          <CardTitle>새 사용자 추가</CardTitle>
+          <CardDescription>새로운 사용자 계정을 생성합니다. 모든 필드를 작성해주세요.</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -191,20 +133,35 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
               {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="active-status"
-                checked={formData.isActive}
-                onCheckedChange={(checked) => handleChange("isActive", checked)}
+            <div className="space-y-2">
+              <Label htmlFor="password">비밀번호</Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => handleChange("password", e.target.value)}
+                className={errors.password ? "border-red-500" : ""}
               />
-              <Label htmlFor="active-status">활성 상태</Label>
+              {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">비밀번호 확인</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => handleChange("confirmPassword", e.target.value)}
+                className={errors.confirmPassword ? "border-red-500" : ""}
+              />
+              {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword}</p>}
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button variant="outline" type="button" onClick={() => router.push("/")}>
               취소
             </Button>
-            <Button type="submit">변경사항 저장</Button>
+            <Button type="submit">사용자 생성</Button>
           </CardFooter>
         </form>
       </Card>
