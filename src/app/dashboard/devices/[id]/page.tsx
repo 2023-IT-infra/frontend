@@ -113,8 +113,6 @@ export default function EditDevicePage({ params }: { params: Promise<{ id: strin
       setIsSubmitting(true)
 
       try {
-        console.log("form submitted", formData)
-
         await updateDevice(deviceId, {
           name: formData.name,
           mac: formData.mac,

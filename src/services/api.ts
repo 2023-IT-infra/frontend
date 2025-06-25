@@ -1,5 +1,7 @@
 // API 기본 URL 설정
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://svr.kiwiwip.duckdns.org"
+// 기본 API 주소는 새 서버 도메인을 사용합니다
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://svr.yukey.site"
 
 // 인증 토큰을 헤더에 추가하는 함수
 const getAuthHeaders = () => {
@@ -38,6 +40,16 @@ export const deviceService = {
   // 모든 기기 가져오기
   async getAll() {
     const response = await fetch(`${API_URL}/api/v1/user/devices`, {
+      headers: getAuthHeaders(),
+    })
+    return handleResponse(response)
+  },
+
+  // 기기 검색
+  async search(query: string) {
+    const url =
+      `${API_URL}/api/v1/user/devices/search?query=${encodeURIComponent(query)}`
+    const response = await fetch(url, {
       headers: getAuthHeaders(),
     })
     return handleResponse(response)
@@ -91,10 +103,9 @@ export const deviceService = {
     if (device.mac !== undefined) deviceData.mac = device.mac
     if (device.txPower !== undefined) deviceData.tx_power = Number(device.txPower)
     if (device.type !== undefined) deviceData.type = device.type
-    if (device.status !== undefined) deviceData.status = Number(device.status === "active")
-
-    console.log(device.txPower)
-    console.log(deviceData)
+    if (device.status !== undefined) {
+      deviceData.status = Number(device.status === "active")
+    }
 
     const response = await fetch(`${API_URL}/api/v1/user/devices/${id}`, {
       method: "PUT",

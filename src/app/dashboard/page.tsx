@@ -6,11 +6,11 @@ import { PlusCircle, Search, LogOut, User, RefreshCw } from "lucide-react"
 import { DeviceList } from "@/components/device-list"
 import { useAdmin } from "@/contexts/admin-context"
 import { useDevices } from "@/contexts/device-context"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export default function DashboardPage() {
   const { logout, admin } = useAdmin()
-  const { refreshDevices, isLoading } = useDevices()
+  const { refreshDevices, searchDevices, isLoading } = useDevices()
   const [searchTerm, setSearchTerm] = useState("")
 
   const handleLogout = () => {
@@ -20,6 +20,13 @@ export default function DashboardPage() {
   const handleRefresh = async () => {
     await refreshDevices()
   }
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      searchDevices(searchTerm)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
 
   return (
     <div className="container mx-auto py-10">
