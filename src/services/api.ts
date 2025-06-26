@@ -47,8 +47,7 @@ export const deviceService = {
 
   // 기기 검색
   async search(query: string) {
-    const url =
-      `${API_URL}/api/v1/user/devices/search?query=${encodeURIComponent(query)}`
+    const url = `${API_URL}/api/v1/user/devices/search?q=${encodeURIComponent(query)}`
     const response = await fetch(url, {
       headers: getAuthHeaders(),
     })
