@@ -250,19 +250,28 @@ export type Admin = {
 }
 
 // FastAPI 모델과 클라이언트 모델 간 변환 함수
-export const mapDeviceFromApi = (apiDevice: any): Device => {
-  return {
-    id: apiDevice.id.toString(),
-    name: apiDevice.name,
-    mac: apiDevice.mac,
-    txPower: apiDevice.tx_power.toString(),
-    type: apiDevice.type,
-    status: apiDevice.status === 1 ? "active" : "inactive",
-    addDate: apiDevice.add_date || new Date().toISOString(),
-  }
-}
+/**
+ * Convert a device object returned from the API into the client model.
+ *
+ * @param apiDevice - Raw device information from the API.
+ * @returns Device formatted for the client.
+ */
+export const mapDeviceFromApi = (apiDevice: any): Device => ({
+  id: apiDevice.id.toString(),
+  name: apiDevice.name,
+  mac: apiDevice.mac,
+  txPower: apiDevice.tx_power.toString(),
+  type: apiDevice.type,
+  status: apiDevice.status === 1 ? 'active' : 'inactive',
+  addDate: apiDevice.add_date || new Date().toISOString(),
+})
 
-export const mapDevicesToApi = (devices: any[]): Device[] => {
-  return devices.map(mapDeviceFromApi)
-}
+/**
+ * Convert an array of devices from the API to the client model.
+ *
+ * @param devices - Array of raw API devices.
+ * @returns Converted devices as {@link Device}[]
+ */
+export const mapDevicesToApi = (devices: any[]): Device[] =>
+  devices.map(mapDeviceFromApi)
 
